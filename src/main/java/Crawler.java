@@ -1,8 +1,15 @@
+import java.io.IOException;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Vector;
 import org.htmlparser.beans.StringBean;
 import org.htmlparser.util.ParserException;
 import java.util.StringTokenizer;
 import org.htmlparser.beans.LinkBean;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import java.net.URL;
 
 
@@ -47,6 +54,49 @@ public class Crawler
         return v_link;
     }
 
+    public String extractTitle() throws IOException
+
+    {
+        Document doc = Jsoup.connect(url).get();
+        String title = doc.title();
+        return title;
+    }
+
+    public Date extractModifiedDate() {
+        /*
+        try {
+            URL place = new URL(url);
+            URLConnection connection = place.openConnection();
+            long date = connection.getLastModified();
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE, MMMM d, yyyy");
+            if(date == 0) {
+                date = connection.getDate();
+            }
+            return dateFormatter.format(new Date(date));
+        }catch (Exception e) {
+            return null;
+        }
+
+         */
+        Date lastModifiedDate = null;
+        try {
+            URL webpageUrl = new URL(url);
+            URLConnection connection = webpageUrl.openConnection();
+
+            long lastModifiedTimestamp = connection.getLastModified();
+
+            if (lastModifiedTimestamp > 0) {
+                lastModifiedDate = new Date(lastModifiedTimestamp);
+                //System.out.println("Last Modified Date: " + lastModifiedDate);
+            } else {
+                lastModifiedDate = new Date();
+                //System.out.println("No Last Modified Date Available. Using System Time: " + lastModifiedDate);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lastModifiedDate;
+    }
     public static void main (String[] args)
     {
         try
@@ -54,27 +104,13 @@ public class Crawler
             Crawler crawler = new Crawler("http://www.cs.ust.hk/~dlee/4321/");
 
 
-            Vector<String> words = crawler.extractWords();
-
-            System.out.println("Words in "+crawler.url+" (size = "+words.size()+") :");
-            for(int i = 0; i < words.size(); i++)
-                if(i<5 || i>words.size()-6){
-                    System.out.println(words.get(i));
-                } else if(i==5){
-                    System.out.println("...");
-                }
-            System.out.println("\n\n");
-
-
-
-            Vector<String> links = crawler.extractLinks();
-            System.out.println("Links in "+crawler.url+":");
-            for(int i = 0; i < links.size(); i++)
-                System.out.println(links.get(i));
-            System.out.println("");
+            String title = crawler.extractTitle();
+            System.out.println(title);
+            Date date = crawler.extractModifiedDate();
+            System.out.println(date);
 
         }
-        catch (ParserException e)
+        catch (Exception e)
         {
             e.printStackTrace ();
         }
