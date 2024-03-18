@@ -102,11 +102,26 @@ public class Crawler
     {
         try
         {
-            Crawler crawler = new Crawler("http://www.cs.ust.hk/~dlee/4321/");
+            Crawler crawler = new Crawler("https://www.cse.ust.hk/~kwtleung/COMP4321/testpage.htm");
 
 
             String title = crawler.extractTitle();
             System.out.println(title);
+
+
+            Vector<String> words = crawler.extractWords();
+
+            System.out.println("Words in "+crawler.url+":");
+            for(int i = 0; i < words.size(); i++)
+                System.out.println(words.get(i)+" ");
+            System.out.println("\n\n");
+
+            Vector<String> links = crawler.extractLinks();
+            System.out.println("Links in "+crawler.url+":");
+            for(int i = 0; i < links.size(); i++)
+                System.out.println(links.get(i));
+            System.out.println("");
+
             Date date = crawler.extractModifiedDate();
             System.out.println(date);
 
