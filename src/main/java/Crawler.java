@@ -92,8 +92,9 @@ public class Crawler
                 lastModifiedDate = new Date();
                 //System.out.println("No Last Modified Date Available. Using System Time: " + lastModifiedDate);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
         return lastModifiedDate;
     }
