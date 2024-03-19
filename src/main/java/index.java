@@ -78,7 +78,7 @@ public class index {
         if(!checkEntry(key))
             hashtable.put(key, value);
     }
-    public void addEntryWithFreq(String key,String value) throws IOException {
+    public void addEntryWithFreq(String key,String value) throws IOException {//to do
         if(hashtable.get(key)==null){
             hashtable.put(key,value+"1");
         }else{

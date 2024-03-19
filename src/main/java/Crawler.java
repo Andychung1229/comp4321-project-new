@@ -62,7 +62,15 @@ public class Crawler
         return title;
     }
 
-    public Date extractModifiedDate() {
+    public String extractPageSize() throws IOException
+
+    {
+        Document doc = Jsoup.connect(url).get();
+        String title = doc.title();
+        return title;
+    }
+
+    public String extractModifiedDate() {
         /*
         try {
             URL place = new URL(url);
@@ -96,7 +104,7 @@ public class Crawler
             e.printStackTrace();
             return null;
         }
-        return lastModifiedDate;
+        return String.valueOf(lastModifiedDate);
     }
     public static void main (String[] args)
     {
@@ -122,7 +130,7 @@ public class Crawler
                 System.out.println(links.get(i));
             System.out.println("");
 
-            Date date = crawler.extractModifiedDate();
+            String date = crawler.extractModifiedDate();
             System.out.println(date);
 
         }
