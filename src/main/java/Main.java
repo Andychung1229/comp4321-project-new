@@ -10,6 +10,7 @@ public class Main {
             Crawler crawler = new Crawler("http://www.cs.ust.hk/~dlee/4321/");
 
 
+
             Vector<String> words = crawler.extractWords();
 
             System.out.println("Words in "+crawler.getUrl()+" (size = "+words.size()+") :");
