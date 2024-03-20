@@ -12,7 +12,8 @@ public class spider {
     static int maxPages = 300;
     static int phase1_Pages=30;
     static RecordManager recman;
-    static StopStem stopStem = new StopStem("C:\\Users\\Andyc\\IdeaProjects\\comp4321-project\\src\\main\\java\\stopwords.txt");
+    //static StopStem stopStem = new StopStem("C:\\Users\\Andyc\\IdeaProjects\\comp4321-project\\src\\main\\java\\stopwords.txt");
+    static StopStem stopStem = new StopStem("src/main/java/stopwords.txt");
     static index visitedPage;
     static index indexToPageURL;
     static index indexToTitle;

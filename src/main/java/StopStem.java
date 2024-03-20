@@ -50,7 +50,7 @@ public class StopStem
     }
     public static void main(String[] arg)
     {
-        StopStem stopStem = new StopStem("C:\\Users\\Andyc\\IdeaProjects\\comp4321-project\\src\\main\\java\\stopwords.txt");
+        StopStem stopStem = new StopStem("src/main/java/stopwords.txt");
         String input="";
         try{
             do
