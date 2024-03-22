@@ -1,13 +1,10 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Vector;
 import jdbm.RecordManager;
 import jdbm.RecordManagerFactory;
-import jdbm.helper.FastIterator;
 import org.htmlparser.util.ParserException;
 
-public class spider {
+public class Spider {
     static String RootPage = "https://www.cse.ust.hk/~kwtleung/COMP4321/testpage.htm";
     static int maxPages = 300;
     static int phase1_Pages=30;
@@ -47,10 +44,9 @@ public class spider {
                 try{
                     String current_url=pageQueue.get(0);
                     pageQueue.remove(0);
-                    System.out.println(current_url);
-                    if(visitedPage.checkEntry(current_url)){
-                        System.out.println("this is added before");
 
+                    if(visitedPage.checkEntry(current_url)){
+                        //System.out.println("this is added before");
 
                     }else{
                         Crawler crawler=new Crawler(current_url);
@@ -62,14 +58,14 @@ public class spider {
                         indexToPageURL.addEntry(String.valueOf(num_pages),current_url);
                         indexToTitle.addEntry(String.valueOf(num_pages),crawler.extractTitle());
                         indexToLastModifiedDate.addEntry(String.valueOf(num_pages),crawler.extractModifiedDate());
+                        addEntryWordFreq(String.valueOf(num_pages),crawler.extractWords());
                         num_pages++;
-
-
-
+                        System.out.println(num_pages);
+                        System.out.println(current_url);
+                        System.out.println(indexToWordWithFreq.getValue(String.valueOf(num_pages-1)));
                     }
 
 
-                    System.out.println(num_pages);
                 } catch (ParserException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
@@ -82,13 +78,31 @@ public class spider {
         }
 
     }
+    public static void addEntryWordFreq(String key,Vector<String> words){
+        try {
+            for (int i = 0; i < words.size(); i++) {
+                String word=words.get(i);
+                //System.out.println(word);
+                if (!stopStem.isStopWord(word)) {
+                    if(word.contains("http")) {
+                        //System.out.println("skip http");
+                        continue;
+                    }
+                    //System.out.println(stopStem.stem(words.get(i)));
+                    indexToWordWithFreq.addEntryWithFreq(key, stopStem.stem(word));
+                }
+            }
+        }catch (Exception e) {
+        e.printStackTrace();
+        }
+    }
     public static void output(){
 
     }
     public static void main(String[] arg){
-        spider.buildDataBase();
-        spider.crawl();
-        spider.output();
+        Spider.buildDataBase();
+        Spider.crawl();
+        Spider.output();
 
     }
 

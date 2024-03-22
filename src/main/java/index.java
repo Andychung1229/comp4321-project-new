@@ -80,10 +80,31 @@ public class index {
     }
     public void addEntryWithFreq(String key,String value) throws IOException {//to do
         if(hashtable.get(key)==null){
-            hashtable.put(key,value+"1");
+            hashtable.put(key,value+" "+"1");
         }else{
-
+            String words=getValue(key);
+            String[] word_list = words.split(" ");
+            boolean inserted = false;
+            for(int i=0;i<word_list.length;i+=2) {
+                if (word_list[i].equals(value)) {
+                    inserted = true;
+                    int freq = Integer.parseInt(word_list[i + 1]);
+                    freq++;
+                    word_list[i + 1] = String.valueOf(freq);
+                }
+            }
+            if(!inserted){
+                int length=word_list.length;
+                String[] newWord_list = new String[length + 2];
+                System.arraycopy(word_list, 0, newWord_list, 0, length);
+                newWord_list[length] = value;
+                newWord_list[length + 1] = "1";
+                word_list = newWord_list;
+            }
+            String modifiedString = String.join(" ", word_list);
+            hashtable.put(key,modifiedString);
         }
+        //System.out.println(getValue(key));
     }
 
     public void delEntry(String word) throws IOException
@@ -147,21 +168,21 @@ public class index {
             index index = new index("lab1","ht1");
 
             index.clearAll();
-            index.addEntry("cat", 2, 6);
-            index.addEntry("dog", 1, 33);
-            System.out.println("First print");
-            index.printAll();
+            index.addEntryWithFreq("1","good");
+            index.addEntryWithFreq("1","good");
+            index.addEntryWithFreq("2","good");
+            index.addEntryWithFreq("2","bad");
+            index.addEntryWithFreq("1","bad");
+            index.addEntryWithFreq("2","bad");
+            index.addEntryWithFreq("2","evil");
+            index.addEntryWithFreq("2","bad");
+            index.addEntryWithFreq("1","bad");
+            index.addEntryWithFreq("2","2");
+            index.addEntryWithFreq("2","good");
+            index.addEntryWithFreq("2","2");
+            index.addEntryWithFreq("2","2");
 
-            index.addEntry("cat", 8, 3);
-            index.addEntry("dog", 6, 73);
-            index.addEntry("dog", 8, 83);
-            index.addEntry("dog", 10, 5);
-            index.addEntry("cat", 11, 106);
-            System.out.println("Second print");
-            index.printAll();
 
-            index.delEntry("dog");
-            System.out.println("Third print");
             index.printAll();
             index.finalize();
         }
