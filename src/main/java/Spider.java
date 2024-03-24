@@ -84,12 +84,13 @@ public class Spider {
                 String word=words.get(i);
                 //System.out.println(word);
                 if (!stopStem.isStopWord(word)) {
-                    if(word.contains("http")||word.equals(" ")||word.isEmpty()) {
+                    String stemword=stopStem.stem(word);
+                    if(stemword.contains("http")||stemword.equals(" ")||stemword.equals("")) {
                          //System.out.println("skip http");
                         continue;
                     }
                     //System.out.println(stopStem.stem(words.get(i)));
-                    indexToWordWithFreq.addEntryWithFreq(key, stopStem.stem(word));
+                    indexToWordWithFreq.addEntryWithFreq(key, stemword);
                 }
             }
         }catch (Exception e) {
