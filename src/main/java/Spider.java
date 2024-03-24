@@ -84,8 +84,8 @@ public class Spider {
                 String word=words.get(i);
                 //System.out.println(word);
                 if (!stopStem.isStopWord(word)) {
-                    if(word.contains("http")) {
-                        //System.out.println("skip http");
+                    if(word.contains("http")||word.equals(" ")||word.isEmpty()) {
+                         //System.out.println("skip http");
                         continue;
                     }
                     //System.out.println(stopStem.stem(words.get(i)));
