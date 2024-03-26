@@ -163,11 +163,11 @@ public class Spider {
                     allList = allS.split(" ");
                     String current, freq;
                     for(i = 0; i < allList.length-2; i+=2) {
+                        if(i>=18)break;
                         current = allList[i];
                         writer.write(current);
                         freq = allList[i+1];
                         writer.write(" "+freq+"; ");
-                        if(i>=16)break;
                     }
                     // for the last keyword and frequency:
                     writer.write(allList[i]);
