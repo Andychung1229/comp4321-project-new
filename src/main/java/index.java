@@ -71,12 +71,32 @@ public class index {
         // ADD YOUR CODES HERE
 
     }
+    public void addEntry(int key, String value) throws IOException
+    {
+        // Add a "docX Y" entry for the key "word" into hashtable
+        // ADD YOUR CODES HERE
+        if(!checkEntry(""+key))
+            hashtable.put(""+key, value);
+    }
     public void addEntry(String key, String value) throws IOException
     {
         // Add a "docX Y" entry for the key "word" into hashtable
         // ADD YOUR CODES HERE
         if(!checkEntry(key))
             hashtable.put(key, value);
+    }
+    public void addLinkRelationships(String key, String value) throws IOException
+    {
+        String word_list =(String)hashtable.get(key);
+        if(word_list!=null&&word_list.contains(value)){
+           return;
+        }
+        else if(word_list==null||word_list.isEmpty()) {
+            hashtable.put(key, value);
+        }else{
+            hashtable.put(key, word_list+" "+value);
+        }
+
     }
     public void addEntryWithFreq(String key,String value) throws IOException {//to do
         if(hashtable.get(key)==null){
@@ -136,7 +156,9 @@ public class index {
         }
 
     }
-
+    public FastIterator getFastIterator() throws IOException {
+        return hashtable.keys();
+    }
     public String getValue(String key) throws IOException {
         return (String) hashtable.get(key);
     }
@@ -165,7 +187,7 @@ public class index {
     {
         try
         {
-            index index = new index("lab1","ht1");
+            index index = new index("index test","ht1");
 
             index.clearAll();
             index.addEntryWithFreq("1","good");

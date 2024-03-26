@@ -3,6 +3,8 @@ import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
+
+import jdbm.helper.FastIterator;
 import org.htmlparser.beans.StringBean;
 import org.htmlparser.util.ParserException;
 import java.util.StringTokenizer;
@@ -65,27 +67,20 @@ public class Crawler
     public String extractPageSize() throws IOException
 
     {
-        Document doc = Jsoup.connect(url).get();
-        String title = doc.title();
-        return title;
+        URL pageUrl = new URL(url);
+        URLConnection connection = pageUrl.openConnection();
+        //connection.connect();
+        long contentLength = connection.getContentLength();
+        if (contentLength != -1) {
+            return String.valueOf(contentLength);
+        }
+        else{
+            String content = connection.getContent().toString();
+            return String.valueOf(content.length());
+        }
     }
 
     public String extractModifiedDate() {
-        /*
-        try {
-            URL place = new URL(url);
-            URLConnection connection = place.openConnection();
-            long date = connection.getLastModified();
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("EEEE, MMMM d, yyyy");
-            if(date == 0) {
-                date = connection.getDate();
-            }
-            return dateFormatter.format(new Date(date));
-        }catch (Exception e) {
-            return null;
-        }
-
-         */
         Date lastModifiedDate = null;
         try {
             URL webpageUrl = new URL(url);
@@ -106,6 +101,7 @@ public class Crawler
         }
         return String.valueOf(lastModifiedDate);
     }
+
     public static void main (String[] args)
     {
         try

@@ -3,15 +3,15 @@ import java.util.Vector;
 import jdbm.RecordManager;
 import jdbm.RecordManagerFactory;
 import org.htmlparser.util.ParserException;
+import jdbm.helper.FastIterator;
 
 public class Spider {
     static String RootPage = "https://www.cse.ust.hk/~kwtleung/COMP4321/testpage.htm";
     static int maxPages = 300;
     static int phase1_Pages=30;
     static RecordManager recman;
-    //static StopStem stopStem = new StopStem("C:\\Users\\Andyc\\IdeaProjects\\comp4321-project\\src\\main\\java\\stopwords.txt");
     static StopStem stopStem = new StopStem("src/main/java/stopwords.txt");
-    static index visitedPage;
+    static index visitedPage;//URL->PageID
     static index indexToPageURL;
     static index indexToTitle;
     static index indexToLastModifiedDate;
@@ -55,14 +55,19 @@ public class Spider {
                         //add all the child links into the to-do list
                         // add entry current only accept (string,string)
                         visitedPage.addEntry(current_url, String.valueOf(num_pages));//num_pages=="ID"
-                        indexToPageURL.addEntry(String.valueOf(num_pages),current_url);
-                        indexToTitle.addEntry(String.valueOf(num_pages),crawler.extractTitle());
-                        indexToLastModifiedDate.addEntry(String.valueOf(num_pages),crawler.extractModifiedDate());
+                        indexToPageURL.addEntry(num_pages,current_url);
+                        indexToTitle.addEntry(num_pages,crawler.extractTitle());
+                        indexToLastModifiedDate.addEntry(num_pages,crawler.extractModifiedDate());
+                        indexToPageSize.addEntry(num_pages,crawler.extractPageSize());
                         addEntryWordFreq(String.valueOf(num_pages),crawler.extractWords());
+                        for(String link:crawler.extractLinks()){
+                            indexToChildLink.addLinkRelationships(String.valueOf(num_pages),link);
+                            linkToParentLink.addLinkRelationships(link,current_url);
+                        }
                         num_pages++;
-                        System.out.println(num_pages);
-                        System.out.println(current_url);
-                        System.out.println(indexToWordWithFreq.getValue(String.valueOf(num_pages-1)));
+                        //System.out.println(num_pages);
+                        //System.out.println(current_url);
+                        //System.out.println(indexToWordWithFreq.getValue(String.valueOf(num_pages-1)));
                     }
 
 
@@ -97,12 +102,93 @@ public class Spider {
         e.printStackTrace();
         }
     }
-    public static void output(){
+    public static void Test(){
+        try{
+            //visitedPage.printAll();
+            //indexToPageURL.printAll();
+            //indexToTitle.printAll();
+            //indexToWordWithFreq.printAll();
+            //indexToPageSize.printAll();
+            //linkToParentLink.printAll();
+            //indexToChildLink.printAll();
 
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void output(){
+        String fileName = "spider_result.txt";
+        try {
+            System.out.println("Writing onto spider_result:");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+            FastIterator itor = indexToTitle.getFastIterator();
+            String key;
+            String title;
+            key= (String) itor.next();
+            while(key!= null) {
+                System.out.println("PageID = "+key);
+                title = indexToTitle.getValue(key);
+                if(!title.isEmpty()) {
+                    writer.write(title);
+                    System.out.println("Title: " + title);
+                }else {
+                    writer.write("No title");
+                    System.out.println("No title");
+                }
+                System.out.println("——————————————–——————————————–———————————");
+                writer.newLine();
+                writer.write(indexToPageURL.getValue(key));
+                writer.newLine();
+                writer.write(indexToLastModifiedDate.getValue(key));
+                writer.write(", ");
+                writer.write(indexToPageSize.getValue(key)); /* to-be-updated */
+                writer.newLine();
+                String allS = indexToWordWithFreq.getValue(key);
+                String[] allList;
+                int i;
+                if(allS != null) {
+                    allList = allS.split(" ");
+                    String current, freq;
+                    for(i = 0; i < allList.length-2; i+=2) {
+                        current = allList[i];
+                        writer.write(current);
+                        freq = allList[i+1];
+                        writer.write(" "+freq+"; ");
+                    }
+                    // for the last keyword and frequency:
+                    writer.write(allList[i]);
+                    writer.write(" "+allList[i+1]);
+                    writer.newLine();
+                }else {
+                    writer.write("No keyword indexed");
+                    writer.newLine();
+                }
+                allS = (String) indexToChildLink.getValue(key);
+                if(allS != null) {
+                    allList = allS.split(" ");
+                    for(i = 0; i < allList.length; ++i) {
+                        writer.write(allList[i]);
+                        writer.newLine();
+                    }
+                }else {
+                    writer.write("No child link");
+                    writer.newLine();
+                }
+                if((key = (String) itor.next())!=null) {
+                    writer.write("——————————————–——————————————–——————————————–——————————————–——————————————–——————————————–");
+                    writer.newLine();
+                }
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     public static void main(String[] arg){
         Spider.buildDataBase();
         Spider.crawl();
+        Spider.Test();
         Spider.output();
 
     }
