@@ -167,6 +167,7 @@ public class Spider {
                         writer.write(current);
                         freq = allList[i+1];
                         writer.write(" "+freq+"; ");
+                        if(i>=16)break;
                     }
                     // for the last keyword and frequency:
                     writer.write(allList[i]);
@@ -182,6 +183,7 @@ public class Spider {
                     for(i = 0; i < allList.length; ++i) {
                         writer.write(allList[i]);
                         writer.newLine();
+                        if(i>=9)break;
                     }
                 }else {
                     writer.write("No child link");
@@ -201,8 +203,8 @@ public class Spider {
     public static void main(String[] arg){
         Spider.buildDataBase();
         Spider.crawl();
-        Spider.Test();
-        //Spider.output();
+        //Spider.Test();
+        Spider.output();
 
     }
 
