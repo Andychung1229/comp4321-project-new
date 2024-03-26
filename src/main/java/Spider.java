@@ -19,6 +19,8 @@ public class Spider {
     static index indexToWordWithFreq;
     static index indexToChildLink;
     static index linkToParentLink;
+    static index idToWord;
+    static index wordToid;
     public static void buildDataBase(){
         try {
             recman = RecordManagerFactory.createRecordManager("database");
@@ -29,7 +31,9 @@ public class Spider {
             indexToWordWithFreq = new index(recman, "indexToWordWithFreq");
             indexToChildLink = new index(recman, "indexToChildLink");
             indexToPageSize = new index(recman, "indexToPageSize");
-            linkToParentLink = new index(recman,"indexToParentLink");
+            linkToParentLink = new index(recman,"linkToParentLink");
+            idToWord = new index(recman, "idToWord");
+            wordToid = new index(recman,"wordToid");
         }catch(Exception e) {
             e.printStackTrace();
         }
@@ -85,6 +89,7 @@ public class Spider {
     }
     public static void addEntryWordFreq(String key,Vector<String> words){
         try {
+            int WordID=0;
             for (int i = 0; i < words.size(); i++) {
                 String word=words.get(i);
                 //System.out.println(word);
@@ -96,6 +101,12 @@ public class Spider {
                     }
                     //System.out.println(stopStem.stem(words.get(i)));
                     indexToWordWithFreq.addEntryWithFreq(key, stemword);
+                    if(!wordToid.checkEntry(stemword)){
+                        wordToid.addEntry(stemword,String.valueOf(WordID));
+                        idToWord.addEntry(WordID,stemword);
+                        WordID++;
+                    }
+
                 }
             }
         }catch (Exception e) {
@@ -111,6 +122,8 @@ public class Spider {
             //indexToPageSize.printAll();
             //linkToParentLink.printAll();
             //indexToChildLink.printAll();
+            //wordToid.printAll();
+            idToWord.printAll();
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -189,7 +202,7 @@ public class Spider {
         Spider.buildDataBase();
         Spider.crawl();
         Spider.Test();
-        Spider.output();
+        //Spider.output();
 
     }
 
