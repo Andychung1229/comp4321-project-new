@@ -34,7 +34,7 @@ public class Crawler
         sb.setLinks (true);
         sb.setURL (url);
 
-        StringTokenizer st=new StringTokenizer(sb.getStrings (),"[ ,?]+<>()|\"\t\n\r•-");
+        StringTokenizer st=new StringTokenizer(sb.getStrings (),"[ ,?]+<>()|\"\t\n\r•");
         while(st.hasMoreTokens()) {
             page_word.add(st.nextToken());
         }
