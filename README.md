@@ -10,4 +10,4 @@ Instructions to build the spider and the test program:
 
 Run the main function of the spider.java
 
-//A "spider_result.txt" will be created and it stores
+A "spider_result.txt" will be created and it stores
