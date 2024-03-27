@@ -8,7 +8,7 @@ import jdbm.helper.FastIterator;
 public class Spider {
     static String RootPage = "https://www.cse.ust.hk/~kwtleung/COMP4321/testpage.htm";
     static int maxPages = 300;
-    static int phase1_Pages=30;
+    static int phase1_Pages = 30;
     static RecordManager recman;
     static StopStem stopStem = new StopStem("src/main/java/stopwords.txt");
     static index visitedPage;//URL->PageID
@@ -21,52 +21,54 @@ public class Spider {
     static index linkToParentLink;
     static index idToWord;
     static index wordToid;
-    public static void buildDataBase(){
+
+    public static void buildDataBase() {
         try {
             recman = RecordManagerFactory.createRecordManager("database");
-            visitedPage = new index(recman,"visitedPage");
+            visitedPage = new index(recman, "visitedPage");
             indexToPageURL = new index(recman, "indexToPage");
             indexToTitle = new index(recman, "indexToTitle");
             indexToLastModifiedDate = new index(recman, "indexToLastModifiedDate");
             indexToWordWithFreq = new index(recman, "indexToWordWithFreq");
             indexToChildLink = new index(recman, "indexToChildLink");
             indexToPageSize = new index(recman, "indexToPageSize");
-            linkToParentLink = new index(recman,"linkToParentLink");
+            linkToParentLink = new index(recman, "linkToParentLink");
             idToWord = new index(recman, "idToWord");
-            wordToid = new index(recman,"wordToid");
-        }catch(Exception e) {
+            wordToid = new index(recman, "wordToid");
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-    public static void crawl(){
-        try{
-            Vector<String> pageQueue=new Vector<String>();// create a to-do queue
+
+    public static void crawl() {
+        try {
+            Vector<String> pageQueue = new Vector<String>();// create a to-do queue
             pageQueue.add(RootPage);//initialize it with the first page
-            int num_pages=0;//pages crawled
-            while(!pageQueue.isEmpty()&&num_pages<phase1_Pages){// crawl 30 pages only in this phase
-                try{
-                    String current_url=pageQueue.get(0);
+            int num_pages = 0;//pages crawled
+            while (!pageQueue.isEmpty() && num_pages < phase1_Pages) {// crawl 30 pages only in this phase
+                try {
+                    String current_url = pageQueue.get(0);
                     pageQueue.remove(0);
 
-                    if(visitedPage.checkEntry(current_url)){
+                    if (visitedPage.checkEntry(current_url)) {
                         //System.out.println("this is added before");
 
-                    }else{
-                        Crawler crawler=new Crawler(current_url);
+                    } else {
+                        Crawler crawler = new Crawler(current_url);
                         //get this information
-                        pageQueue.addAll(crawler.extractLinks()) ;
+                        pageQueue.addAll(crawler.extractLinks());
                         //add all the child links into the to-do list
                         // add entry current only accept (string,string)
                         visitedPage.addEntry(current_url, String.valueOf(num_pages));//num_pages=="ID"
-                        indexToPageURL.addEntry(num_pages,current_url);
-                        indexToTitle.addEntry(num_pages,crawler.extractTitle());
-                        indexToLastModifiedDate.addEntry(num_pages,crawler.extractModifiedDate());
-                        indexToPageSize.addEntry(num_pages,crawler.extractPageSize());
-                        addEntryWordFreq(String.valueOf(num_pages),crawler.extractWords());
-                        for(String link:crawler.extractLinks()){
-                            indexToChildLink.addLinkRelationships(String.valueOf(num_pages),link);
-                            linkToParentLink.addLinkRelationships(link,current_url);
+                        indexToPageURL.addEntry(num_pages, current_url);
+                        indexToTitle.addEntry(num_pages, crawler.extractTitle());
+                        indexToLastModifiedDate.addEntry(num_pages, crawler.extractModifiedDate());
+                        indexToPageSize.addEntry(num_pages, crawler.extractPageSize());
+                        addEntryWordFreq(String.valueOf(num_pages), crawler.extractWords());
+                        for (String link : crawler.extractLinks()) {
+                            indexToChildLink.addLinkRelationships(String.valueOf(num_pages), link);
+                            linkToParentLink.addLinkRelationships(link, current_url);
                         }
                         num_pages++;
                         //System.out.println(num_pages);
@@ -82,11 +84,19 @@ public class Spider {
                 }
 
             }
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
+
+    public void finalize_() throws IOException {
+        this.recman.commit();
+        this.recman.close();
+    }
+
+
+
     public static void addEntryWordFreq(String key,Vector<String> words){
         try {
             int WordID=0;
@@ -200,11 +210,13 @@ public class Spider {
             e.printStackTrace();
         }
     }
-    public static void main(String[] arg){
+    public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
         Spider.crawl();
-        //Spider.Test();
+//        Spider.Test();
         Spider.output();
+        recman.commit();
+        recman.close();
 
     }
 
