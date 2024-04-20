@@ -75,8 +75,8 @@ public class index {
     {
         // Add a "docX Y" entry for the key "word" into hashtable
         // ADD YOUR CODES HERE
-        if(!checkEntry(""+key))
-            hashtable.put(""+key, value);
+        if(!checkEntry(key))
+            hashtable.put(key, value);
     }
     public void addEntry(String key, String value) throws IOException
     {
@@ -142,7 +142,7 @@ public class index {
     }
 
     public boolean checkEntry(int check) throws IOException{
-        String original = (String) hashtable.get("" + check);
+        String original = (String) hashtable.get(check);
         return (original == null || original.equals("")) ? false : true;
     }
     public void printAll() throws IOException
@@ -150,9 +150,18 @@ public class index {
         // Print all the data in the hashtable
         // ADD YOUR CODES HERE
         FastIterator it =hashtable.keys();
-        String key;
-        while((key=(String)it.next())!=null){
-            System.out.println(key+": "+hashtable.get(key));
+        while(true){
+            Object key = it.next();
+            if (key == null) {
+                break;
+            }
+            if (key instanceof Integer) {
+                int intKey = (int) key;
+                System.out.println(intKey + ": " + hashtable.get(intKey));
+            } else if (key instanceof String) {
+                String stringKey = (String) key;
+                System.out.println(stringKey + ": " + hashtable.get(stringKey));
+            }
         }
 
     }

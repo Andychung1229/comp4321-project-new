@@ -14,6 +14,7 @@ public class Spider {
     static index visitedPage;//URL->PageID
     static index indexToPageURL;
     static index indexToTitle;
+    static index TitleToIndex;
     static index indexToLastModifiedDate;
     static index indexToPageSize;
     static index indexToWordWithFreq;
@@ -21,6 +22,7 @@ public class Spider {
     static index linkToParentLink;
     static index idToWord;
     static index wordToid;
+
 
     public static void buildDataBase() {
         try {
@@ -35,6 +37,7 @@ public class Spider {
             linkToParentLink = new index(recman, "linkToParentLink");
             idToWord = new index(recman, "idToWord");
             wordToid = new index(recman, "wordToid");
+            TitleToIndex = new index(recman, "TitleToIndex");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -63,6 +66,7 @@ public class Spider {
                         visitedPage.addEntry(current_url, String.valueOf(num_pages));//num_pages=="ID"
                         indexToPageURL.addEntry(num_pages, current_url);
                         indexToTitle.addEntry(num_pages, crawler.extractTitle());
+                        TitleToIndex.addEntry(crawler.extractTitle(), String.valueOf(num_pages));
                         indexToLastModifiedDate.addEntry(num_pages, crawler.extractModifiedDate());
                         indexToPageSize.addEntry(num_pages, crawler.extractPageSize());
                         addEntryWordFreq(String.valueOf(num_pages), crawler.extractWords());
@@ -125,15 +129,16 @@ public class Spider {
     }
     public static void Test(){
         try{
-            //visitedPage.printAll();
-            //indexToPageURL.printAll();
-            //indexToTitle.printAll();
-            //indexToWordWithFreq.printAll();
+            visitedPage.printAll();
+            indexToPageURL.printAll();
+            indexToTitle.printAll();
+            indexToWordWithFreq.printAll();
             //indexToPageSize.printAll();
             //linkToParentLink.printAll();
             //indexToChildLink.printAll();
             //wordToid.printAll();
-            idToWord.printAll();
+            //idToWord.printAll();
+            //TitleToIndex.printAll();
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -213,8 +218,8 @@ public class Spider {
     public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
         Spider.crawl();
-//        Spider.Test();
-        Spider.output();
+        Spider.Test();
+        //Spider.output();
         recman.commit();
         recman.close();
 
