@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Search Engine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            width: 100%;
+            background-color: #2e8692;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .search-bar {
+            width: 30%;
+            margin: 20px auto;
+            padding: 10px;
+            border: 2px solid #2e8692;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar input[type="text"] {
+            
+            width: 60%;
+            padding: 10px;
+            border: none;
+            border-radius: 20px 0 0 20px;
+            font-size: 1em;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: #2e8692;
+            color: #fff;
+            border: none;
+            border-radius: 0 20px 20px 0;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .results {
+            width: 100%;
+            margin: 20px auto;
+            display: flex;
+            flex-wrap: wrap;
+            
+            justify-content: center;
+        }
+
+        .result {
+            width: 90%;
+            font-size: 21px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            margin-left: 30px;
+            border-radius: 10px;
+        }
+
+        .footer {
+            width: 100%;
+            background: #2e8692;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+            margin-top: auto;
+            background-color: #2e8692;
+        }
+        .icon {
+            position:relative;
+            top: 20px;
+            right: 20px;
+            width: 311px; /* Adjust the width to the desired size */
+            height: 100px; /* Adjust the height to the desired size */
+            background-color: transparent; /* Make the background transparent */
+        }
+        .title-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            margin-right: 10px; /* Adjust the margin as needed */
+        }
+        .Date-size{
+            display: flex;
+            align-items: center;
+            margin-bottom: 1px;
+        }
+        .date{
+            margin-right: 20px;
+            
+        }
+
+        @media (max-width: 768px) {
+            .icon {
+                position: static;
+                width: auto;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img class="icon" src=2.png alt="Icon">
+        <p>HKUST Comp4321</p>
+        <p>Group 40 web searching engine</p>
+        
+
+    </div>
+    <div class="search-bar">
+        <form id="searchForm" onsubmit="searchResults(event)">
+            <input type="text" id="searchInput" name="query" placeholder="Enter your query">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <div class="results" id="resultsContainer"></div>
+   
+    <div class="footer">
+        <a href="team.html">About Team</a>
+        <a href="pdf.html">Project Report</a>
+        
+    </div>
+    
+    <script>
+        function searchResults(event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            // Get the search query from the input field
+            const query = document.getElementById('searchInput').value;
+
+            // Make an AJAX request to the JSP file
+            fetch('search.jsp?query=' + encodeURIComponent(query))
+                .then(response => response.text())
+                .then(data => {
+                    // Update the resultsContainer with the JSP response
+                    const resultsContainer = document.getElementById('resultsContainer');
+                    resultsContainer.innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+        function adjustFooterPosition() {
+            const footer = document.querySelector('.footer');
+
+            if (footer.offsetTop + footer.offsetHeight < window.innerHeight) {
+                footer.style.position = 'fixed';
+                footer.style.bottom = '0';
+            } else {
+                footer.style.position = 'static';
+            }
+        }
+
+        // Call the function initially to adjust the footer position
+        adjustFooterPosition();
+
+        // Call the function whenever the window is resized or scrolled
+        window.addEventListener('resize', adjustFooterPosition);
+        window.addEventListener('scroll', adjustFooterPosition);
+    </script>
+</body>
+</html>
