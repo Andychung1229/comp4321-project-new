@@ -69,9 +69,9 @@ public class Spider {
                         TitleToIndex.addEntry(crawler.extractTitle(), String.valueOf(num_pages));
                         indexToLastModifiedDate.addEntry(num_pages, crawler.extractModifiedDate());
                         indexToPageSize.addEntry(num_pages, crawler.extractPageSize());
-                        addEntryWordFreq(String.valueOf(num_pages), crawler.extractWords());
+                        addEntryWordFreq(num_pages, crawler.extractWords());
                         for (String link : crawler.extractLinks()) {
-                            indexToChildLink.addLinkRelationships(String.valueOf(num_pages), link);
+                            indexToChildLink.addLinkRelationships(num_pages, link);
                             linkToParentLink.addLinkRelationships(link, current_url);
                         }
                         num_pages++;
@@ -101,7 +101,7 @@ public class Spider {
 
 
 
-    public static void addEntryWordFreq(String key,Vector<String> words){
+    public static void addEntryWordFreq(int key,Vector<String> words){
         try {
             int WordID=0;
             for (int i = 0; i < words.size(); i++) {
@@ -129,13 +129,13 @@ public class Spider {
     }
     public static void Test(){
         try{
-            visitedPage.printAll();
-            indexToPageURL.printAll();
-            indexToTitle.printAll();
-            indexToWordWithFreq.printAll();
+            //visitedPage.printAll();
+            //indexToPageURL.printAll();
+            //indexToTitle.printAll();
+            //indexToWordWithFreq.printAll();
             //indexToPageSize.printAll();
             //linkToParentLink.printAll();
-            //indexToChildLink.printAll();
+            indexToChildLink.printAll();
             //wordToid.printAll();
             //idToWord.printAll();
             //TitleToIndex.printAll();
@@ -150,12 +150,12 @@ public class Spider {
             System.out.println("Writing onto spider_result:");
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
             FastIterator itor = indexToTitle.getFastIterator();
-            String key;
+            Object key;
             String title;
-            key= (String) itor.next();
+            key= itor.next();
             while(key!= null) {
                 System.out.println("PageID = "+key);
-                title = indexToTitle.getValue(key);
+                title = indexToTitle.getValue((int)key);
                 if(!title.isEmpty()) {
                     writer.write(title);
                     System.out.println("Title: " + title);
@@ -165,13 +165,13 @@ public class Spider {
                 }
                 System.out.println("——————————————–——————————————–———————————");
                 writer.newLine();
-                writer.write(indexToPageURL.getValue(key));
+                writer.write(indexToPageURL.getValue((int)key));
                 writer.newLine();
-                writer.write(indexToLastModifiedDate.getValue(key));
+                writer.write(indexToLastModifiedDate.getValue((int)key));
                 writer.write(", ");
-                writer.write(indexToPageSize.getValue(key)); /* to-be-updated */
+                writer.write(indexToPageSize.getValue((int)key)); /* to-be-updated */
                 writer.newLine();
-                String allS = indexToWordWithFreq.getValue(key);
+                String allS = indexToWordWithFreq.getValue((int)key);
                 String[] allList;
                 int i;
                 if(allS != null) {
@@ -192,11 +192,13 @@ public class Spider {
                     writer.write("No keyword indexed");
                     writer.newLine();
                 }
-                allS = (String) indexToChildLink.getValue(key);
-                if(allS != null) {
-                    allList = allS.split(" ");
-                    for(i = 0; i < allList.length; ++i) {
-                        writer.write(allList[i]);
+                String links =  indexToChildLink.getValue((int)key);
+                System.out.println(indexToChildLink.getValue((int)key));
+                String[] linksList;
+                if(links != null) {
+                    linksList = links.split(" ");
+                    for(i = 0; i < linksList.length; ++i) {
+                        writer.write(linksList[i]);
                         writer.newLine();
                         if(i>=9)break;
                     }
@@ -204,7 +206,7 @@ public class Spider {
                     writer.write("No child link");
                     writer.newLine();
                 }
-                if((key = (String) itor.next())!=null) {
+                if((key =  itor.next())!=null) {
                     writer.write("——————————————–——————————————–——————————————–——————————————–——————————————–——————————————–");
                     writer.newLine();
                 }
@@ -218,8 +220,8 @@ public class Spider {
     public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
         Spider.crawl();
-        Spider.Test();
-        //Spider.output();
+        //Spider.Test();
+        Spider.output();
         recman.commit();
         recman.close();
 

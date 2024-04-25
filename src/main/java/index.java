@@ -98,7 +98,20 @@ public class index {
         }
 
     }
-    public void addEntryWithFreq(String key,String value) throws IOException {//to do
+    public void addLinkRelationships(int key, String value) throws IOException
+    {
+        String word_list =(String)hashtable.get(key);
+        if(word_list!=null&&word_list.contains(value)){
+            return;
+        }
+        else if(word_list==null||word_list.isEmpty()) {
+            hashtable.put(key, value);
+        }else{
+            hashtable.put(key, word_list+" "+value);
+        }
+
+    }
+    public void addEntryWithFreq(int key,String value) throws IOException {//to do
         if(hashtable.get(key)==null){
             hashtable.put(key,value+" "+"1");
         }else{
@@ -127,15 +140,24 @@ public class index {
         //System.out.println(getValue(key));
     }
 
-    public void delEntry(String word) throws IOException
-    {
-        // Delete the word and its list from the hashtable
-        if(hashtable.get(word)!=null){
-            hashtable.remove(word);
-        }
-        // ADD YOUR CODES HERE
-
-    }
+//    public void delEntry(String word) throws IOException
+//    {
+//        // Delete the word and its list from the hashtable
+//        if(hashtable.get(word)!=null){
+//            hashtable.remove(word);
+//        }
+//        // ADD YOUR CODES HERE
+//
+//    }
+//    public void delEntry(int word) throws IOException
+//    {
+//        // Delete the word and its list from the hashtable
+//        if(hashtable.get(word)!=null){
+//            hashtable.remove(word);
+//        }
+//        // ADD YOUR CODES HERE
+//
+//    }
     public boolean checkEntry(String check) throws IOException{
         String original = (String) hashtable.get(check);
         return (original == null || original.equals("")) ? false : true;
@@ -171,7 +193,9 @@ public class index {
     public String getValue(String key) throws IOException {
         return (String) hashtable.get(key);
     }
-
+    public String getValue(int key) throws IOException {
+        return (String) hashtable.get(key);
+    }
     public int getNumKey() throws IOException {
         FastIterator iter = hashtable.keys();
         int numKey = 0;
@@ -183,12 +207,18 @@ public class index {
     public void clearAll() throws IOException {
         List<String> keysToRemove = new ArrayList<>();
         FastIterator it = hashtable.keys();
-        String key;
-        while ((key = (String) it.next()) != null) {
-            keysToRemove.add(key);
+        Object key;
+        while ((key =  it.next()) != null) {
+            keysToRemove.add(String.valueOf(key));
         }
         for (String keyToRemove : keysToRemove) {
-            hashtable.remove(keyToRemove);
+            if (hashtable.keys().next() instanceof Integer) {
+                hashtable.remove(Integer.valueOf(keyToRemove));
+            }
+            else{
+                hashtable.remove(keyToRemove);
+            }
+
         }
     }
 
@@ -196,26 +226,25 @@ public class index {
     {
         try
         {
-            index index = new index("index test","ht1");
+            index intindex = new index("index test","ht1");
+            index stringindex = new index("index test","ht1");
+            intindex.clearAll();
+            stringindex.clearAll();
+            intindex.addEntryWithFreq(1,"good");
+            intindex.addEntryWithFreq(1,"good");
+            intindex.addEntryWithFreq(2,"good");
 
-            index.clearAll();
-            index.addEntryWithFreq("1","good");
-            index.addEntryWithFreq("1","good");
-            index.addEntryWithFreq("2","good");
-            index.addEntryWithFreq("2","bad");
-            index.addEntryWithFreq("1","bad");
-            index.addEntryWithFreq("2","bad");
-            index.addEntryWithFreq("2","evil");
-            index.addEntryWithFreq("2","bad");
-            index.addEntryWithFreq("1","bad");
-            index.addEntryWithFreq("2","2");
-            index.addEntryWithFreq("2","good");
-            index.addEntryWithFreq("2","2");
-            index.addEntryWithFreq("2","2");
+            intindex.addEntryWithFreq(2,"bad");
 
+            stringindex.addEntry("a","good");
+            stringindex.clearAll();
+            stringindex.addEntry("b","good");
 
-            index.printAll();
-            index.finalize();
+            stringindex.addEntry("c","bad");
+
+            stringindex.printAll();
+            intindex.printAll();
+            intindex.finalize();
         }
         catch(IOException ex)
         {
