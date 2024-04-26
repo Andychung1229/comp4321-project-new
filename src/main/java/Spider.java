@@ -23,6 +23,9 @@ public class Spider {
     static index idToWord;
     static index wordToid;
 
+    static index wordToDocPos;
+
+
 
     public static void buildDataBase() {
         try {
@@ -38,6 +41,7 @@ public class Spider {
             idToWord = new index(recman, "idToWord");
             wordToid = new index(recman, "wordToid");
             TitleToIndex = new index(recman, "TitleToIndex");
+            wordToDocPos= new index(recman, "wordToDocPos");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,21 +104,24 @@ public class Spider {
     }
 
 
-
     public static void addEntryWordFreq(int key,Vector<String> words){
         try {
             int WordID=0;
+            int countPos=0;
             for (int i = 0; i < words.size(); i++) {
+                countPos++;
                 String word=words.get(i);
                 //System.out.println(word);
                 if (!stopStem.isStopWord(word)) {
                     String stemword=stopStem.stem(word);
                     if(stemword.contains("http")||stemword.equals(" ")||stemword.equals("")) {
                          //System.out.println("skip http");
+                        countPos--;
                         continue;
                     }
                     //System.out.println(stopStem.stem(words.get(i)));
                     indexToWordWithFreq.addEntryWithFreq(key, stemword);
+                    wordToDocPos.addEntry(stemword, key, countPos);
                     if(!wordToid.checkEntry(stemword)){
                         wordToid.addEntry(stemword,String.valueOf(WordID));
                         idToWord.addEntry(WordID,stemword);
@@ -135,10 +142,11 @@ public class Spider {
             //indexToWordWithFreq.printAll();
             //indexToPageSize.printAll();
             //linkToParentLink.printAll();
-            indexToChildLink.printAll();
+            //indexToChildLink.printAll();
             //wordToid.printAll();
             //idToWord.printAll();
             //TitleToIndex.printAll();
+            wordToDocPos.printAll();
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -193,7 +201,7 @@ public class Spider {
                     writer.newLine();
                 }
                 String links =  indexToChildLink.getValue((int)key);
-                System.out.println(indexToChildLink.getValue((int)key));
+
                 String[] linksList;
                 if(links != null) {
                     linksList = links.split(" ");
@@ -220,8 +228,8 @@ public class Spider {
     public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
         Spider.crawl();
-        //Spider.Test();
-        Spider.output();
+        Spider.Test();
+        //Spider.output();
         recman.commit();
         recman.close();
 
