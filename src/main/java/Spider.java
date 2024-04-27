@@ -228,7 +228,7 @@ public class Spider {
     public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
         Spider.crawl();
-        //Spider.Test();
+        Spider.Test();
         Spider.output();
         recman.commit();
         recman.close();
