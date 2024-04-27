@@ -85,6 +85,7 @@ public class Searcher extends Spider {
                 System.out.println("TF:  "+keywordsList[i]+" : "+tf);
                 int index =Integer.parseInt(wordToid.getValue(keywordsList[i]));
                 double idf= idfMap.get(index);
+                //testing use
                 int numKey= visitedPage.getNumKey();
                 System.out.println("df:  "+keywordsList[i]+" : "+Math.round(numKey/Math.exp(idf)-1));
                 System.out.println("idf:  "+keywordsList[i]+" : "+idf);
