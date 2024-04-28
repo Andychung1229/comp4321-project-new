@@ -208,7 +208,7 @@ public class Searcher extends Spider {
         s.add("test");
         s.add("test");
         s.add("ug");
-        s.add("buuuuuuuuug");
+        s.add("buuuuuuuug");
         s.add("fighter");
 
 
