@@ -53,6 +53,7 @@ public class Spider {
             Vector<String> pageQueue = new Vector<String>();// create a to-do queue
             pageQueue.add(RootPage);//initialize it with the first page
             int num_pages = 0;//pages crawled
+            int wordID=0;
             while (!pageQueue.isEmpty() && num_pages < phase1_Pages) {// crawl 30 pages only in this phase
                 try {
                     String current_url = pageQueue.get(0);
@@ -73,7 +74,7 @@ public class Spider {
                         TitleToIndex.addEntry(crawler.extractTitle(), String.valueOf(num_pages));
                         indexToLastModifiedDate.addEntry(num_pages, crawler.extractModifiedDate());
                         indexToPageSize.addEntry(num_pages, crawler.extractPageSize());
-                        addEntryWordFreq(num_pages, crawler.extractWords());
+                        wordID=addEntryWordFreq(num_pages, crawler.extractWords(),wordID);
                         for (String link : crawler.extractLinks()) {
                             indexToChildLink.addLinkRelationships(num_pages, link);
                             linkToParentLink.addLinkRelationships(link, current_url);
@@ -104,9 +105,8 @@ public class Spider {
     }
 
 
-    public static void addEntryWordFreq(int key,Vector<String> words){
+    public static int addEntryWordFreq(int key,Vector<String> words,int wordID){
         try {
-            int WordID=0;
             int countPos=0;
             for (int i = 0; i < words.size(); i++) {
                 countPos++;
@@ -123,16 +123,18 @@ public class Spider {
                     indexToWordWithFreq.addEntryWithFreq(key, stemword);
                     wordToDocPos.addEntry(stemword, key, countPos);
                     if(!wordToid.checkEntry(stemword)){
-                        wordToid.addEntry(stemword,String.valueOf(WordID));
-                        idToWord.addEntry(WordID,stemword);
-                        WordID++;
+                        wordToid.addEntry(stemword,String.valueOf(wordID));
+                        idToWord.addEntry(wordID,stemword);
+                        wordID++;
                     }
 
                 }
+
             }
         }catch (Exception e) {
         e.printStackTrace();
         }
+        return wordID;
     }
     public static void Test(){
         try{

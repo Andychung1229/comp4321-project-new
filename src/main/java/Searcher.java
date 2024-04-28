@@ -34,24 +34,24 @@ public class Searcher extends Spider {
             }
             int numKey= visitedPage.getNumKey();
             int numKey_2= idToWord.getNumKey();
+            int numKey_3= wordToDocPos.getNumKey();
             System.out.println(numKey);
 
             //indexToWordWithFreq.printAll();
             //
             Map<String, Double>[] tfMap = new HashMap[numKey];
-            Vector<Double> idfMap = new Vector<>();
+            Vector<Double> dfMap = new Vector<>();
 
 
 
             //calculate idf
             for(int i=0;i<numKey_2;i++){
                 //System.out.println("word "+i+"  :");
-                calculateIDF((int)i,numKey,idfMap);
+                calculateDF(i,dfMap);
             }
             //calculate tfxidf
             for(int i=0;i<numKey;i++){
-                System.out.println("Doc "+i+"  :");
-                tfMap[i]=calculateTFxIDF((int)i,idfMap);
+                tfMap[i]=calculateTFxIDF(i,dfMap);
             }
 
 
@@ -60,6 +60,9 @@ public class Searcher extends Spider {
 
 
             System.out.println(tfMap[0].get("page"));
+            System.out.println(dfMap.get(Integer.parseInt(wordToid.getValue("paper"))));
+            System.out.println(wordToid.getValue("vigilant"));
+            System.out.println(idToWord.getValue(2517));
             return result;
             //
 
@@ -82,14 +85,19 @@ public class Searcher extends Spider {
             }        //create a new hashMap with Tf values in it.
             for (int i = 0; i < keywordsList.length; i += 2) {
                 double tf = Integer.parseInt(keywordsList[i + 1]) / sum;
-                System.out.println("TF:  "+keywordsList[i]+" : "+tf);
+
                 int index =Integer.parseInt(wordToid.getValue(keywordsList[i]));
-                double idf= idfMap.get(index);
-                //testing use
                 int numKey= visitedPage.getNumKey();
-                System.out.println("df:  "+keywordsList[i]+" : "+Math.round(numKey/Math.exp(idf)-1));
+                double df= idfMap.get(index);
+                double idf = Math.log(numKey/(df))/Math.log(2);
+                //testing use
+                System.out.println("Doc "+key+"  :");
+                System.out.println("TF:  "+keywordsList[i]+" : "+keywordsList[i + 1]);
+                System.out.println("TF(Norm):  "+keywordsList[i]+" : "+tf);
+                System.out.println("df:  "+keywordsList[i]+" : "+Math.round(numKey/Math.pow(2,idf)));
                 System.out.println("idf:  "+keywordsList[i]+" : "+idf);
                 System.out.println("TFxidf:  "+keywordsList[i]+" : "+tf*idf);
+                //testing use
                 termFreqMap.put(keywordsList[i], tf*idf);
             }
         }catch (Exception e) {
@@ -97,26 +105,37 @@ public class Searcher extends Spider {
         }
         return termFreqMap;
     }
-    public void calculateIDF(int key,int docSize,Vector<Double> idfMap) throws IOException {
-        HashMap<String,Double> InverseDocFreqMap = new HashMap<>();
+    public void calculateDF(int key,Vector<Double> idfMap) throws IOException {
+
         String word= idToWord.getValue(key);
-        double df =0 ;
-        for(int i=0;i<docSize;i++){
-            String keywords = indexToWordWithFreq.getValue(i);
-            if (keywords == null) continue;
-            String[] keywordsList = keywords.split(" ");
-            for(int j = 0; j < keywordsList.length; j += 2) {
-                if (keywordsList[j].equals(word)) {
-                    //System.out.println("DF:  " + i + " : ");
-                    df++;
-                    break;
-                }
+        double df =1 ;
+//        for(int i=0;i<docSize;i++){
+//            String keywords = indexToWordWithFreq.getValue(i);
+//            if (keywords == null) continue;
+//            String[] keywordsList = keywords.split(" ");
+//            for(int j = 0; j < keywordsList.length; j += 2) {
+//                if (keywordsList[j].equals(word)) {
+//                    //System.out.println("DF:  " + i + " : ");
+//                    df++;
+//                    break;
+//                }
+//            }
+//        }
+
+        String position = wordToDocPos.getValue(word);
+        String[] positionList = position.split(" ");
+
+        for(int j=2;j<positionList.length;j+=2){
+            if(!positionList[j].equals(positionList[j-2])) {
+
+                df++;
             }
         }
-        double idf = Math.log(docSize/(df+1));
+
+        //double idf = Math.log(docSize/(df))/Math.log(2);
         //System.out.println("DF:  "+word+" : "+df);
         //System.out.println("IDF:  "+word+" : "+idf);
-        idfMap.add(idf);
+        idfMap.add(df);
 
     }
 
