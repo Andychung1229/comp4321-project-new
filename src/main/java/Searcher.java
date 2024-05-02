@@ -9,18 +9,25 @@ public class Searcher extends Spider {
         try {
 
             Vector<Page> result = new Vector<>();
-            Vector<Integer> moreThanOneWord = new Vector<>();
+            Vector<String> phrase_word = new Vector<>();
             Vector<String> wordlist = new Vector<>();
             Vector<String> uni_wordlist = new Vector<>();
             Vector<String> wordDocPos = new Vector<>();
-
-            for(int i = 0; i < keywords.size(); i++){
+            Vector<String> phrasewordDocPos = new Vector<>();
+            int phrase_count = 0;
+            for (int i = 0; i < keywords.size(); i++) {
                 String word = keywords.get(i);
-                if(word.contains(" ")){
-                    moreThanOneWord.add(i);
-                    continue;
+                if (word.contains("\"")) {
+                    phrase_count++;
                 }
-                if (!word.isEmpty()&&!stopStem.isStopWord(word)) {
+                if (phrase_count > 0) {
+                    String stemword = stopStem.stem(word);
+                    if (!stemword.isEmpty() && !stopStem.isStopWord(word))
+                        phrase_word.add(stemword);
+                    if (phrase_count == 2)
+                        phrase_count = -1;
+                }
+                if (!word.isEmpty() && !stopStem.isStopWord(word)) {
                     String stemword = stopStem.stem(word);
                     if (wordToDocPos.getValue(stemword) != null) {
                         wordlist.add(stemword);
@@ -31,17 +38,19 @@ public class Searcher extends Spider {
                     }
                 }
             }
-            if (wordDocPos.isEmpty()&& moreThanOneWord.isEmpty()) {
-                return null;}
+            System.out.println("phrase_word:" + phrase_word);
+            if (wordDocPos.isEmpty() && phrase_word.isEmpty()) {
+                return null;
+            }
 
-            for(String word:wordlist){
-                if(!uni_wordlist.contains(word))
+            for (String word : wordlist) {
+                if (!uni_wordlist.contains(word))
                     uni_wordlist.add(word);
             }
             System.out.println(uni_wordlist);
-            int numKey= visitedPage.getNumKey();
-            int numKey_2= idToWord.getNumKey();
-            int numKey_3= wordToDocPos.getNumKey();
+            int numKey = visitedPage.getNumKey();
+            int numKey_2 = idToWord.getNumKey();
+            int numKey_3 = wordToDocPos.getNumKey();
             System.out.println(numKey);
 
             //indexToWordWithFreq.printAll();
@@ -50,52 +59,93 @@ public class Searcher extends Spider {
             Vector<Double> dfMap = new Vector<>();
             HashMap<String, Double> keywordMap = new HashMap();
 
+            Vector<Integer> phrase_doc = null;
+            if (!phrase_word.isEmpty()) {
+
+
+                String DocPos = wordToDocPos.getValue(phrase_word.get(0));
+                if(DocPos==null)return null;
+
+                String[] DocPoslist = DocPos.split(" ");
+
+                for (int i = 1; i < phrase_word.size(); i++) {
+                    for (int j= 0; j < DocPoslist.length; j += 2) {
+                        DocPoslist[j + 1]=String.valueOf(Integer.parseInt(DocPoslist[j + 1]) + 1);
+                    }
+                    String tempDocPos = wordToDocPos.getValue(phrase_word.get(i));
+                    if (tempDocPos ==null) return null;
+                    for (int j = 0; j < DocPoslist.length; j += 2) {
+                        String tempword = DocPoslist[j] +" "+ DocPoslist[j + 1];
+                        if (!tempDocPos.contains(tempword)) {
+                            DocPoslist[j + 1] = "-1";
+                        }
+                    }
+                }
+                phrase_doc = new Vector<>();
+                for (int j = 0; j < DocPoslist.length; j += 2) {
+                    if (!Objects.equals(DocPoslist[j + 1], "-1"))
+                        phrase_doc.add(Integer.parseInt(DocPoslist[j].substring(3)));
+                }
+
+
+            }
+
+            System.out.println("phrase" + phrase_doc);
 
             //calculate idf
-            for(String word: uni_wordlist){
+            for (String word : uni_wordlist) {
                 //System.out.println("word "+i+"  :");
-                calculateDF(word,dfMap);
+                calculateDF(word, dfMap);
             }
             //calculate tfxidf
-            for(int i=0;i<numKey;i++){
-                tfxidfMap[i]=calculateTFxIDF(i,dfMap,uni_wordlist);
+            for (int i = 0; i < numKey; i++) {
+                tfxidfMap[i] = calculateTFxIDF(i, dfMap, uni_wordlist);
             }
-            for(String word: wordlist){
-                double temp= (keywordMap.get(word)==null)?0:  keywordMap.get(word);
-                keywordMap.put(word,temp+1.0);// normalize need /uni_wordlist.size()
+            for (String word : wordlist) {
+                double temp = (keywordMap.get(word) == null) ? 0 : keywordMap.get(word);
+                keywordMap.put(word, temp + 1.0 / uni_wordlist.size());// normalize need /uni_wordlist.size()
             }
 
-            for(int i=0;i<uni_wordlist.size();i++){
-                double temp= (keywordMap.get(uni_wordlist.get(i))==null)?0:  keywordMap.get(uni_wordlist.get(i));
-                double df= dfMap.get(i);
-                double idf = Math.log(numKey/(df))/Math.log(2);
-                keywordMap.put(uni_wordlist.get(i),temp*idf);
+            for (int i = 0; i < uni_wordlist.size(); i++) {
+                double temp = (keywordMap.get(uni_wordlist.get(i)) == null) ? 0 : keywordMap.get(uni_wordlist.get(i));
+                double df = dfMap.get(i);
+                double idf = Math.log(numKey / (df)) / Math.log(2);
+                keywordMap.put(uni_wordlist.get(i), temp * idf);
             }
 
             //Cosine Similarity Measures
-            double sumD=0;
-            double sumQ=0;
-            double sumDQ=0;
-            double titleMatch=0;
+            double sumD = 0;
+            double sumQ = 0;
+            double sumDQ = 0;
+            int titleMatch = 0;
 
             //for(int i=0;i<wordlist.size())
-            for(double value: keywordMap.values()){
-                sumQ+=value*value;
+            for (double value : keywordMap.values()) {
+                sumQ += value * value;
             }
-            sumQ=Math.sqrt(sumQ);
-            for(int doc_index=0;doc_index<numKey;doc_index++){
+            sumQ = Math.sqrt(sumQ);
+            for (int doc_index = 0; doc_index < numKey; doc_index++) {
 
-                if(tfxidfMap[doc_index].isEmpty())continue;
-                sumD= 0;
-                sumDQ=0;
+                if (tfxidfMap[doc_index].isEmpty()||phrase_doc!=null&&!phrase_doc.contains(doc_index)&&phrase_count==-1) continue;
+                sumD = 0;
+                sumDQ = 0;
 
                 for (String key : tfxidfMap[doc_index].keySet()) {
 
-                    double value=tfxidfMap[doc_index].get(key);
-                    sumD +=value*value;
-                    sumDQ+=value*keywordMap.get(key);
+                    double value = tfxidfMap[doc_index].get(key);
+                    sumD += value * value;
+                    sumDQ += value * keywordMap.get(key);
                 }
-                sumD=Math.sqrt(sumD);
+                String title = indexToTitle.getValue(doc_index);
+                String[] titlelist = title.split(" ");
+                titleMatch = 0;
+                for (String titleWord : titlelist) {
+                    if (!stopStem.isStopWord(titleWord) && uni_wordlist.contains(stopStem.stem(titleWord)))
+                        titleMatch++;
+                }
+
+
+                sumD = Math.sqrt(sumD);
                 double cosineSimilarity = (sumDQ / sumD) / sumQ + titleMatch;
 
 
@@ -111,47 +161,46 @@ public class Searcher extends Spider {
                 currentPage.setPageTitle(indexToTitle.getValue(doc_index));
                 currentPage.setLastUpdateTime(indexToLastModifiedDate.getValue(doc_index));
                 //child link and parent link are added below
-                if(indexToChildLink.checkEntry(doc_index)){
+                if (indexToChildLink.checkEntry(doc_index)) {
                     String[] childLinks = indexToChildLink.getValue(doc_index).split(" ");
-                    for(String childLink : childLinks) {
+                    for (String childLink : childLinks) {
                         currentPage.addChildrenLink(childLink);
                     }
                 }
                 //please help check link 179-184, and the output, the first number after amount is amount of parentLink
-                if(linkToParentLink.checkEntry(indexToPageURL.getValue(doc_index))){		//seems have problem, request for checking
+                if (linkToParentLink.checkEntry(indexToPageURL.getValue(doc_index))) {        //seems have problem, request for checking
                     String[] parentLinks = linkToParentLink.getValue(indexToPageURL.getValue(doc_index)).split(" ");
-                    for(String parentLink : parentLinks) {
+                    for (String parentLink : parentLinks) {
                         currentPage.addParentLink(parentLink);
                     }
-                }else if(linkToParentLink.checkEntry(indexToPageURL.getValue(doc_index) + "/")) {
+                } else if (linkToParentLink.checkEntry(indexToPageURL.getValue(doc_index) + "/")) {
                     String[] parentLinks = linkToParentLink.getValue(indexToPageURL.getValue(doc_index) + "/").split(" ");
-                    for(String parentLink : parentLinks) {
+                    for (String parentLink : parentLinks) {
                         currentPage.addParentLink(parentLink);
                     }
                 }
                 String[] wordListWithFrequency = indexToWordWithFreq.getValue(doc_index).split(" ");
                 Vector<KeyWord> topFiveWord = new Vector<KeyWord>();
-                for(int i = 0; i < wordListWithFrequency.length; i+=2) {
-                    topFiveWord.addElement(new KeyWord(wordListWithFrequency[i], Integer.parseInt(wordListWithFrequency[i+1])));
+                for (int i = 0; i < wordListWithFrequency.length; i += 2) {
+                    topFiveWord.addElement(new KeyWord(wordListWithFrequency[i], Integer.parseInt(wordListWithFrequency[i + 1])));
                 }
                 Collections.sort(topFiveWord);
-                for(int i = 0; i < 5 && i < topFiveWord.size(); i++) {
+                for (int i = 0; i < 5 && i < topFiveWord.size(); i++) {
                     currentPage.addTopFiveWord(topFiveWord.get(i));
                 }
                 result.add(currentPage);
             }
 
 
-
-            for(int i=0;i<numKey;i++){
-                if(!tfxidfMap[i].isEmpty())
-                    System.out.println("Doc"+i+" :"+tfxidfMap[i]);
+            for (int i = 0; i < numKey; i++) {
+                if (!tfxidfMap[i].isEmpty())
+                    System.out.println("Doc" + i + " :" + tfxidfMap[i]);
             }
-            System.out.println("Qry:"+keywordMap);
+            System.out.println("Qry:" + keywordMap);
             System.out.println(wordlist);
             System.out.println(uni_wordlist);
-            for(int i=0;i<uni_wordlist.size();i++)
-                System.out.println("df: "+ uni_wordlist.get(i) +""+ dfMap.get(i));
+            for (int i = 0; i < uni_wordlist.size(); i++)
+                System.out.println("df: " + uni_wordlist.get(i) + "" + dfMap.get(i));
 
 
             //System.out.println(tfMap[0].get("page"));
@@ -183,7 +232,7 @@ public class Searcher extends Spider {
             for (int i = 0; i < keywordsList.length; i += 2) {
                 if(!wordlist.contains(keywordsList[i]))
                     continue;
-                double tf = Integer.parseInt(keywordsList[i + 1]) ;// normalize need /sum
+                double tf = Integer.parseInt(keywordsList[i + 1])/sum ;// normalize need /sum
                 int numKey= visitedPage.getNumKey();
                 int index=wordlist.indexOf(keywordsList[i]);
                 double df= dfMap.get(index);
