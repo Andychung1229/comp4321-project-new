@@ -21,6 +21,7 @@ public class Searcher extends Spider {
                     phrase_count++;
                 }
                 if (phrase_count > 0) {
+                    if(word.isEmpty())continue;
                     String stemword = stopStem.stem(word);
                     if (!stemword.isEmpty() && !stopStem.isStopWord(word))
                         phrase_word.add(stemword);
