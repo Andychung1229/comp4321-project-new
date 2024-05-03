@@ -250,6 +250,7 @@ public class Searcher extends Spider {
             }
         }catch (Exception e) {
             e.printStackTrace();
+
         }
         return termFreqMap;
     }
