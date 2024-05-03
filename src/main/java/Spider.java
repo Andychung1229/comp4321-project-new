@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Objects;
 import java.util.Vector;
 import jdbm.RecordManager;
 import jdbm.RecordManagerFactory;
@@ -47,24 +48,13 @@ public class Spider {
         }
 
     }
+    public static boolean  modifyDateCheck(String url,Crawler crawler) throws IOException {
+        crawler.extractModifiedDate();
+        if(!visitedPage.checkEntry(url))
+            return true;
 
-    public static boolean checkModifiedDate(String url){
-        try{
-            // If it is not visited
-            if (!visitedPage.checkEntry(url)) {
-                return true;
-            }
-            // It is visited before, but we need to check the last modified date
-            Crawler crawler = new Crawler(url);
-            // If the last modified date are the same, return false, otherwise return true
-            if (indexToLastModifiedDate.getValue(visitedPage.getValue(url)) != crawler.extractModifiedDate()){
-                return true;
-            }
-            else{
-                return false;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(indexToLastModifiedDate.getValue(Integer.parseInt(visitedPage.getValue(url))).equals(crawler.extractModifiedDate())){
+            return false;
         }
         return true;
     }
@@ -78,15 +68,54 @@ public class Spider {
                 try {
                     String current_url = pageQueue.get(0);
                     pageQueue.remove(0);
+                    Crawler crawler = new Crawler(current_url);
+                    //get this information
+                    boolean modifydate_check=true;
+                    boolean addentry_need=false;
+                    //case 1 exist before
+                    if(visitedPage.checkEntry(current_url)&&(indexToPageURL.getValue(num_pages)==null||!indexToPageURL.getValue(num_pages).equals(current_url))){
+                        System.out.println(num_pages+"exist before");
+                        continue;
+                    }
+                    //case 2 exist now
+                    if(indexToPageURL.getValue(num_pages)!=null&&indexToPageURL.getValue(num_pages).equals(current_url)){
+                        //Date unchanged
+                        if(Objects.equals(indexToLastModifiedDate.getValue(Integer.parseInt(visitedPage.getValue(current_url))), crawler.extractModifiedDate()))
+                        {
+                            System.out.println(num_pages+"exist now , date unchanged");
+                            pageQueue.addAll(crawler.extractLinks());
+                            num_pages +=1;
 
-                    //if(visitedPage.checkEntry(current_url)){
-                    //     //System.out.println("this is added before");
-                    //}
-                    //If it is visited and the last modified date is the same, no need to crawl again
-                    if (!checkModifiedDate(current_url)) {
-                        //System.out.println("this is added before");
-                    } else {
-                        Crawler crawler = new Crawler(current_url);
+                        }else{
+                            System.out.println(num_pages+"exist now , date changed");
+                            //del
+                            indexToWordWithFreq.delEntry(num_pages);
+                            indexToTitle.delEntry(num_pages);
+                            TitleToIndex.delEntry(num_pages);
+                            indexToLastModifiedDate.delEntry(num_pages);
+                            indexToPageSize.delEntry(num_pages);
+                            indexToChildLink.delEntry(num_pages);
+                            addentry_need=true;
+                        }
+                    }
+
+
+                    if (!visitedPage.checkEntry(current_url)) {
+                        System.out.println(num_pages+"not ,exist");
+                        addentry_need=true;
+//                        System.out.println(num_pages+"date changed");
+//                        visitedPage.delEntry(num_pages);//num_pages=="ID"
+//                        indexToPageURL.delEntry(num_pages);
+//                        indexToTitle.delEntry(num_pages);
+//                        TitleToIndex.delEntry(num_pages);
+//                        indexToLastModifiedDate.delEntry(num_pages);
+//                        indexToPageSize.delEntry(num_pages);
+//                        indexToWordWithFreq.delEntry(num_pages);
+//                        indexToChildLink.delEntry(num_pages);
+
+                    }
+                    if(addentry_need) {
+                        System.out.println(num_pages+"new pages");
                         //get this information
                         pageQueue.addAll(crawler.extractLinks());
                         //add all the child links into the to-do list
@@ -138,7 +167,7 @@ public class Spider {
                 if (!stopStem.isStopWord(word)) {
                     String stemword=stopStem.stem(word);
                     if(stemword.contains("http")||stemword.equals(" ")||stemword.equals("")) {
-                         //System.out.println("skip http");
+                        //System.out.println("skip http");
                         countPos--;
                         continue;
                     }
@@ -155,7 +184,7 @@ public class Spider {
 
             }
         }catch (Exception e) {
-        e.printStackTrace();
+            e.printStackTrace();
         }
         return wordID;
     }
@@ -171,7 +200,7 @@ public class Spider {
             //wordToid.printAll();
             //idToWord.printAll();
             //TitleToIndex.printAll();
-            wordToDocPos.printAll();
+            //wordToDocPos.printAll();
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -252,8 +281,12 @@ public class Spider {
     }
     public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
+        Spider.indexToLastModifiedDate.delEntry(180);
+        Spider.indexToLastModifiedDate.delEntry(175);
+        Spider.indexToLastModifiedDate.addEntry(180,"01");
+        Spider.indexToLastModifiedDate.addEntry(175,"00");
         Spider.crawl();
-        Spider.Test();
+        //Spider.Test();
         Spider.output();
         recman.commit();
         recman.close();

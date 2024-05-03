@@ -14,10 +14,12 @@ public class Searcher extends Spider {
             Vector<String> uni_wordlist = new Vector<>();
             Vector<String> wordDocPos = new Vector<>();
 
+            boolean phrase_detected=false;
             int phrase_count = 0;
             for (int i = 0; i < keywords.size(); i++) {
                 String word = keywords.get(i);
                 if (word.contains("\"")) {
+                    phrase_detected=true;
                     phrase_count++;
                 }
                 if (phrase_count > 0) {
@@ -126,7 +128,7 @@ public class Searcher extends Spider {
             sumQ = Math.sqrt(sumQ);
             for (int doc_index = 0; doc_index < numKey; doc_index++) {
 
-                if (tfxidfMap[doc_index].isEmpty()||phrase_doc!=null&&!phrase_doc.contains(doc_index)&&phrase_count==0) continue;
+                if (tfxidfMap[doc_index].isEmpty()||phrase_detected&&phrase_doc!=null&&!phrase_doc.contains(doc_index)) continue;
                 sumD = 0;
                 sumDQ = 0;
 
