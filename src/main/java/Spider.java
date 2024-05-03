@@ -48,6 +48,26 @@ public class Spider {
 
     }
 
+    public static boolean checkModifiedDate(String url){
+        try{
+            // If it is not visited
+            if (!visitedPage.checkEntry(url)) {
+                return true;
+            }
+            // It is visited before, but we need to check the last modified date
+            Crawler crawler = new Crawler(url);
+            // If the last modified date are the same, return false, otherwise return true
+            if (indexToLastModifiedDate.getValue(visitedPage.getValue(url)) != crawler.extractModifiedDate()){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
     public static void crawl() {
         try {
             Vector<String> pageQueue = new Vector<String>();// create a to-do queue
@@ -59,9 +79,12 @@ public class Spider {
                     String current_url = pageQueue.get(0);
                     pageQueue.remove(0);
 
-                    if (visitedPage.checkEntry(current_url)) {
+                    //if(visitedPage.checkEntry(current_url)){
+                    //     //System.out.println("this is added before");
+                    //}
+                    //If it is visited and the last modified date is the same, no need to crawl again
+                    if (!checkModifiedDate(current_url)) {
                         //System.out.println("this is added before");
-
                     } else {
                         Crawler crawler = new Crawler(current_url);
                         //get this information
