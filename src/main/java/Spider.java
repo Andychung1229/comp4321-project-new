@@ -8,7 +8,7 @@ import jdbm.helper.FastIterator;
 public class Spider {
     static String RootPage = "https://www.cse.ust.hk/~kwtleung/COMP4321/testpage.htm";
     static int maxPages = 300;
-    static int phase1_Pages = 30;
+    static int phase1_Pages = 300;
     static RecordManager recman;
     static StopStem stopStem = new StopStem("src/main/java/stopwords.txt");
     static index visitedPage;//URL->PageID

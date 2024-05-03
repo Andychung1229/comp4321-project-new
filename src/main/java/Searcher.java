@@ -13,7 +13,7 @@ public class Searcher extends Spider {
             Vector<String> wordlist = new Vector<>();
             Vector<String> uni_wordlist = new Vector<>();
             Vector<String> wordDocPos = new Vector<>();
-            Vector<String> phrasewordDocPos = new Vector<>();
+
             int phrase_count = 0;
             for (int i = 0; i < keywords.size(); i++) {
                 String word = keywords.get(i);
@@ -25,8 +25,7 @@ public class Searcher extends Spider {
                     String stemword = stopStem.stem(word);
                     if (!stemword.isEmpty() && !stopStem.isStopWord(word))
                         phrase_word.add(stemword);
-                    if (phrase_count == 2)
-                        phrase_count = -1;
+                    phrase_count%=2;
                 }
                 if (!word.isEmpty() && !stopStem.isStopWord(word)) {
                     String stemword = stopStem.stem(word);
@@ -77,7 +76,7 @@ public class Searcher extends Spider {
                     if (tempDocPos ==null) return null;
                     for (int j = 0; j < DocPoslist.length; j += 2) {
                         String tempword = DocPoslist[j] +" "+ DocPoslist[j + 1];
-                        if (!tempDocPos.contains(tempword)) {
+                        if (!tempDocPos.contains(tempword+" ")) {
                             DocPoslist[j + 1] = "-1";
                         }
                     }
@@ -127,7 +126,7 @@ public class Searcher extends Spider {
             sumQ = Math.sqrt(sumQ);
             for (int doc_index = 0; doc_index < numKey; doc_index++) {
 
-                if (tfxidfMap[doc_index].isEmpty()||phrase_doc!=null&&!phrase_doc.contains(doc_index)&&phrase_count==-1) continue;
+                if (tfxidfMap[doc_index].isEmpty()||phrase_doc!=null&&!phrase_doc.contains(doc_index)&&phrase_count==0) continue;
                 sumD = 0;
                 sumDQ = 0;
 
@@ -192,16 +191,16 @@ public class Searcher extends Spider {
                 result.add(currentPage);
             }
 
-
-            for (int i = 0; i < numKey; i++) {
-                if (!tfxidfMap[i].isEmpty())
-                    System.out.println("Doc" + i + " :" + tfxidfMap[i]);
-            }
-            System.out.println("Qry:" + keywordMap);
-            System.out.println(wordlist);
-            System.out.println(uni_wordlist);
-            for (int i = 0; i < uni_wordlist.size(); i++)
-                System.out.println("df: " + uni_wordlist.get(i) + "" + dfMap.get(i));
+//
+//            for (int i = 0; i < numKey; i++) {
+//                if (!tfxidfMap[i].isEmpty())
+//                    System.out.println("Doc" + i + " :" + tfxidfMap[i]);
+//            }
+//            System.out.println("Qry:" + keywordMap);
+//            System.out.println(wordlist);
+//            System.out.println(uni_wordlist);
+//            for (int i = 0; i < uni_wordlist.size(); i++)
+//                System.out.println("df: " + uni_wordlist.get(i) + "" + dfMap.get(i));
 
 
             //System.out.println(tfMap[0].get("page"));
