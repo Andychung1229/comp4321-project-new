@@ -64,6 +64,23 @@ public class Spider {
             pageQueue.add(RootPage);//initialize it with the first page
             int num_pages = 0;//pages crawled
             int wordID=0;
+            //case root page changed
+            if(visitedPage.getValue(RootPage)==null||!visitedPage.getValue(RootPage).equals("0")){
+                System.out.println("clean all");
+                visitedPage.clearAll();;//num_pages=="ID"
+                indexToPageURL.clearAll();;
+                indexToTitle.clearAll();;
+                TitleToIndex.clearAll();;
+                indexToLastModifiedDate.clearAll();
+                indexToPageSize.clearAll();
+                indexToWordWithFreq.clearAll();
+                indexToChildLink.clearAll();
+                linkToParentLink.clearAll();
+                wordToid.clearAll();
+                idToWord.clearAll();
+                wordToDocPos.clearAll();
+
+            }
             while (!pageQueue.isEmpty() && num_pages < phase1_Pages) {// crawl 30 pages only in this phase
                 try {
                     String current_url = pageQueue.get(0);
@@ -72,13 +89,15 @@ public class Spider {
                     //get this information
                     boolean modifydate_check=true;
                     boolean addentry_need=false;
+                    String index_page=indexToPageURL.getValue(num_pages);
+                    //case 0
                     //case 1 exist before
-                    if(visitedPage.checkEntry(current_url)&&(indexToPageURL.getValue(num_pages)==null||!indexToPageURL.getValue(num_pages).equals(current_url))){
+                    if(visitedPage.checkEntry(current_url)&&(index_page==null||!index_page.equals(current_url))){
                         System.out.println(num_pages+"exist before");
                         continue;
                     }
                     //case 2 exist now
-                    if(indexToPageURL.getValue(num_pages)!=null&&indexToPageURL.getValue(num_pages).equals(current_url)){
+                    else if(index_page!=null&&index_page.equals(current_url)){
                         //Date unchanged
                         if(Objects.equals(indexToLastModifiedDate.getValue(Integer.parseInt(visitedPage.getValue(current_url))), crawler.extractModifiedDate()))
                         {
@@ -87,6 +106,7 @@ public class Spider {
                             num_pages +=1;
 
                         }else{
+                            //Date changed
                             System.out.println(num_pages+"exist now , date changed");
                             //del
                             indexToWordWithFreq.delEntry(num_pages);
@@ -95,12 +115,13 @@ public class Spider {
                             indexToLastModifiedDate.delEntry(num_pages);
                             indexToPageSize.delEntry(num_pages);
                             indexToChildLink.delEntry(num_pages);
+                            linkToParentLink.delEntry(num_pages);
                             addentry_need=true;
                         }
                     }
 
-
-                    if (!visitedPage.checkEntry(current_url)) {
+                    //case 3 not exist
+                    else if (!visitedPage.checkEntry(current_url)) {
                         System.out.println(num_pages+"not ,exist");
                         addentry_need=true;
 //                        System.out.println(num_pages+"date changed");
@@ -281,10 +302,10 @@ public class Spider {
     }
     public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
-        Spider.indexToLastModifiedDate.delEntry(180);
-        Spider.indexToLastModifiedDate.delEntry(175);
-        Spider.indexToLastModifiedDate.addEntry(180,"01");
-        Spider.indexToLastModifiedDate.addEntry(175,"00");
+//        Spider.indexToLastModifiedDate.delEntry(180);
+//        Spider.indexToLastModifiedDate.delEntry(175);
+//        Spider.indexToLastModifiedDate.addEntry(180,"01");
+//        Spider.indexToLastModifiedDate.addEntry(175,"00");
         Spider.crawl();
         //Spider.Test();
         Spider.output();
