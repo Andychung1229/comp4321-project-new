@@ -76,6 +76,28 @@ public class index {
         }
         hashtable.put(word, added);
     }
+    public void modifiedEntry(int delDoc) throws IOException
+    {
+
+        FastIterator it =hashtable.keys();
+        while(true) {
+            Object key = it.next();
+            if (key == null) {
+                break;
+            }
+            String word=(String)key;
+            String original = (String) hashtable.get(word);
+            if(!original.contains("doc"+delDoc))continue;
+            hashtable.put(word, "");
+            String[] originallist = original.split(" ");
+            for (int i = 0; i < originallist.length; i += 2) {
+                if (!originallist[i].equals("doc" + delDoc)) {
+                    addEntry(word, Integer.parseInt(originallist[i].substring(3)), Integer.parseInt(originallist[i + 1]));
+                }
+            }
+        }
+
+    }
     public void addEntry(int key, String value) throws IOException
     {
         // Add a "docX Y" entry for the key "word" into hashtable

@@ -114,8 +114,31 @@ public class Spider {
                             TitleToIndex.delEntry(num_pages);
                             indexToLastModifiedDate.delEntry(num_pages);
                             indexToPageSize.delEntry(num_pages);
-                            indexToChildLink.delEntry(num_pages);
-                            linkToParentLink.delEntry(num_pages);
+                            //linkToParentLink.delEntry(num_pages);
+                            String child_link=indexToChildLink.getValue(num_pages);
+                            if(child_link!=null){
+                                indexToChildLink.delEntry(num_pages);
+                                String[] child_link_list=child_link.split(" ");
+                                for(String link:child_link_list){
+                                    String parent_Link=linkToParentLink.getValue(link);
+                                   // System.out.println(parent_Link);
+                                    linkToParentLink.delEntry(link);
+                                    String wordToRemove = indexToPageURL.getValue(num_pages);
+                                    String result = parent_Link.replaceAll("\\b" + wordToRemove + "\\b", "");
+                                    result = result.replaceAll("\\s+", " ").trim();
+                                    linkToParentLink.addEntry(link, result);
+                                    //System.out.println(linkToParentLink.getValue(link));
+                                }
+                            }
+                            //wordToDocPos.printAll();
+                            wordToDocPos.modifiedEntry(num_pages);
+
+                            //wordToDocPos.printAll();
+
+
+
+
+
                             addentry_need=true;
                         }
                     }
@@ -302,12 +325,12 @@ public class Spider {
     }
     public static void main(String[] arg) throws IOException {
         Spider.buildDataBase();
-//        Spider.indexToLastModifiedDate.delEntry(180);
-//        Spider.indexToLastModifiedDate.delEntry(175);
-//        Spider.indexToLastModifiedDate.addEntry(180,"01");
-//        Spider.indexToLastModifiedDate.addEntry(175,"00");
+        Spider.indexToLastModifiedDate.delEntry(1);
+        Spider.indexToLastModifiedDate.delEntry(175);
+        Spider.indexToLastModifiedDate.addEntry(1,"01");
+        Spider.indexToLastModifiedDate.addEntry(175,"00");
         Spider.crawl();
-        //Spider.Test();
+        Spider.Test();
         Spider.output();
         recman.commit();
         recman.close();
